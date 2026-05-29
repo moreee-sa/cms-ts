@@ -1,10 +1,14 @@
 import express, { Router, type Request, type Response } from 'express'
+import { PostSchema, type PostType } from '@/types';
+import z from 'zod';
 const app = express();
 const port: number = 3000;
 const baseURL: string = '/cms/v1'
 const WP_BASE_URL = "http://cms.test/wp-json/wp/v2";
 
 app.use(express.json());
+
+// TODO: Serve un middleware che automaticamente rifiuti le richieste quando il contenuto JSON ha il formato errato
 
 const cmsRouter = Router();
 
@@ -36,12 +40,6 @@ cmsRouter.get('/posts', async (req: Request, res: Response) => {
   }
 });
 
-type PostType = {
-  title: string;
-  content: string;
-  status: string;
-}
-
 // Route per inserire in wordpress l'articolo
 cmsRouter.post('/posts', async (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
@@ -55,19 +53,44 @@ cmsRouter.post('/posts', async (req: Request, res: Response) => {
   };
 
   // Verifica se il contenuto dell'articolo e' stato ricevuto
-  const postBodyData: PostType = req.body;
-  if (!postBodyData) {
+  const postData: PostType = req.body;
+  if (!postData) {
     return res.json({
       success: false,
       error: "La richiesta non e' stata effettuata correttamente"
     }).sendStatus(400);
   }
 
-  console.log(postBodyData.content)
-  console.log(postBodyData.title)
-  console.log(postBodyData.status)
+  try {
+    // Validazione dei dati
+    const parsePostData = PostSchema.parse({
+      title: postData.title,
+      content: postData.content,
+      status: postData.status,
+    });
 
-  return res.sendStatus(200);
+    // Clone fortemente tipizzato dei dati
+    console.log(parsePostData.title)
+    console.log(parsePostData.content)
+    console.log(parsePostData.status)
+
+    // TODO: Elaborazione dati con AI
+    // ? Fetch WordPress
+
+    return res.sendStatus(200);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      // Issues essendo un array, si puo' iterare per vedere il messaggio
+      for (const issue of error.issues) {
+        console.log(issue.message);
+      }
+    }
+
+    return res.json({
+      success: false,
+      error: "La richiesta non e' stata effettuata correttamente"
+    }).sendStatus(400);
+  }
 });
 
 app.use(baseURL, cmsRouter);
