@@ -1,15 +1,21 @@
 # cms-ts
-
-To install dependencies:
-
+## Installazione dipendenze
 ```bash
 bun install
 ```
 
-To run:
-
+## Avvio
+Se si vuole avviare in dev mode
 ```bash
-bun run index.ts
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.3.14. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Se si vuole avviare la dist
+```bash
+bun run build
+bun run start
+```
+
+## Errore bundle
+E' stato aggiunto nello script build `--external express` che serve ad escludere express dal bundle finale.
+Se si vuole includere express nel bundle finale, rimuovi `--external express` e aggiungi `--target=bun`
