@@ -6,7 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "bun --watch ./src/index.ts",
-    "build": "bun run typecheck && bun build ./src/index.ts --minify --outdir ./dist",
+    "build": "bun run typecheck && bun build ./src/index.ts --minify --external express --outdir ./dist",
     "start": "bun ./dist/index.js",
     "clean": "rm -rf dist && echo 'Cartella dist eliminata.'"
   },
