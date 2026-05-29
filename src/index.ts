@@ -35,7 +35,7 @@ cmsRouter.get('/posts', async (req: Request, res: Response) => {
 
     return res.sendStatus(response.status);
   } catch (error) {
-    console.error("Errore di connessione a Wordpress ->", error);
+    console.error("Errore di connessione a Wordpress");
     return res.sendStatus(500);
   }
 });
@@ -82,7 +82,7 @@ cmsRouter.post('/posts', async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       // Issues essendo un array, si puo' iterare per vedere il messaggio
       for (const issue of error.issues) {
-        console.log(issue.message);
+        console.error(issue.message);
       }
     }
 
