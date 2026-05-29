@@ -76,6 +76,11 @@ cmsRouter.post('/posts', async (req: Request, res: Response) => {
 
     // TODO: Elaborazione dati con AI
     // ? Fetch WordPress
+    
+    // * Quando si effettua una richiesta API all'AI il testo principalmente sara' di tipo Markdown
+    // * Esiste una libreria chiamata marked.js
+    // ! Marked non sanifica l'output HTML, quindi attacchi XSS sono possibili
+    // ! E' consigliabile utilizzare DOMPurify come opzionedi filtraggio
 
     return res.sendStatus(200);
   } catch (error) {
