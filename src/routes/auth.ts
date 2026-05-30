@@ -1,9 +1,9 @@
-import { UserSchema, type UserType } from '@/types';
+import { LoginSchema, UserSchema, type LoginType, type UserType } from '@/types';
 import type { Request, Response } from 'express';
 import { handleError } from '@/routes/errors';
 import { config } from '@/lib';
 import { type ApplicationPassword } from '@/types';
-import { insertUser } from '@/db';
+import { getUser, insertUser } from '@/db';
 
 // Questa funzione consiste nel creare l'utente in WordPress, prendere il suo ID e creare la password dell'applicazione e viene salvato in un database SQL a parte
 export const createUser = async (req: Request, res: Response) => {
@@ -46,8 +46,8 @@ export const createUser = async (req: Request, res: Response) => {
       }
     })
 
-    // Se l'utente esiste gia', invia un codice di stato 409
-    if (response.status !== 500) {
+    // Se la risposta e' diversa da 201, allora vuol dire che c'e' stato qualche problema
+    if (response.status !== 201) {
       const data = await response.json() as { code: string, message: string };
       
       return res.status(409).json({
@@ -86,6 +86,33 @@ export const createUser = async (req: Request, res: Response) => {
     return res.status(201).json({ success: true });
   } catch (error) {
     console.log(error);
+    return handleError(error, res);
+  }
+}
+
+// Funzione che si occupa del login dell'utente
+export const loginUser = async (req: Request, res: Response) => {
+  const userData: LoginType = req.body;
+
+  if (!userData) {
+    return res.json({
+      success: false,
+      error: "La richiesta non e' stata effettuata correttamente"
+    }).sendStatus(400);
+  };
+
+  try {
+    const parseLoginUserData = LoginSchema.parse({
+      email: userData.email,
+      password: userData.password
+    });
+
+    await getUser(parseLoginUserData);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'USER_DOES_NOT_EXIST') {
+      return res.status(404).json({ success: false, message: "Utente non trovato" });
+    }
+
     return handleError(error, res);
   }
 }
