@@ -3,17 +3,20 @@ import { getPosts, insertPost } from '@/routes/wordpress';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
 import { createUser, loginUser } from '@/routes/auth';
+import { authMiddleware } from '@/routes/middleware';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 // TODO: Serve un middleware che automaticamente rifiuti le richieste quando il contenuto JSON ha il formato errato
 
 const cmsRouter = Router();
 
 // Questi endpoint si occupano di gestire il fetch dei dati su wordpress
-cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
+cmsRouter.get('/', authMiddleware, getAPIHealth); // Route per verificare la salute dell'API
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
 cmsRouter.post('/posts', insertPost); // Route per inserire in wordpress l'articolo
 
