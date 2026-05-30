@@ -2,6 +2,7 @@ import express, { Router, type Request, type Response } from 'express'
 import { getPosts, insertPost } from '@/routes/wordpress';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
+import { createUser } from '@/routes/auth';
 
 const app = express();
 
@@ -11,14 +12,14 @@ app.use(express.json());
 
 const cmsRouter = Router();
 
-// Route per verificare la salute dell'API
-cmsRouter.get('/', getAPIHealth);
+// Questi endpoint si occupano di gestire il fetch dei dati su wordpress
+cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
+cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
+cmsRouter.post('/posts', insertPost); // Route per inserire in wordpress l'articolo
 
-// Route per ottenere i post dentro wordpress
-cmsRouter.get('/posts', getPosts);
-
-// Route per inserire in wordpress l'articolo
-cmsRouter.post('/posts', insertPost);
+// Endpoint per la gestione degli utenti
+cmsRouter.post('/auth/register', createUser);
+// TODO: /cms/v1/auth/login
 
 app.use(config.server.prefix, cmsRouter);
 
