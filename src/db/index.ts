@@ -1,5 +1,7 @@
+import { generateToken, hashPass, verifyHash } from '@/crypto';
 import type { ApplicationPassword, LoginType, UserType } from '@/types';
 import mysql, { type RowDataPacket } from 'mysql2/promise';
+import { jwt } from 'zod';
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = Bun.env;
 
@@ -33,20 +35,8 @@ const initDb = async () => {
     )
   `;
 
-  const createToken = `
-    CREATE TABLE IF NOT EXISTS Token (
-      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-      user_id BIGINT UNSIGNED NOT NULL,
-      revoked BOOLEAN DEFAULT FALSE,
-      expires_at TIMESTAMP NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES User(id)
-    )
-  `;
-
   try {
     await conn.query(createUser);
-    await conn.query(createToken);
   } catch (err) {
     console.error(err);
   } finally {
@@ -58,7 +48,8 @@ await initDb();
 
 export const insertUser = async (user: UserType, appPassword: ApplicationPassword) => {
   const sql: string = 'INSERT INTO `User`(`name`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?);';
-  const valus: string[] = [user.name, user.email, user.password, appPassword.password, appPassword.created]
+  const hash: string = await hashPass(user.password);
+  const valus: string[] = [user.name, user.email, hash, appPassword.password, appPassword.created]
 
   const [result, fields] = await pool.execute(sql, valus);
   return result
@@ -85,9 +76,11 @@ export const getUser = async (user: LoginType) => {
 
   const userData = result[0]!;
 
-  // E' necessario argon2 per verificare la password
-  if (user.password == userData.password) {
-    // Se l'utente e' effettivamente lui, genera un token
-    const sql: string = ''
+  // Se la password non e' corretta lancia un errore
+  if (!await verifyHash(userData.password, user.password)) {
+    throw new Error('INVALID_PASSWORD');
   }
+
+  // Genera un token
+  return await generateToken({ id: userData.id, email: userData.email });
 }
