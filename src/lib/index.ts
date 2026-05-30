@@ -11,5 +11,8 @@ export const config = {
     baseUrl: 'https://cms.test/wp-json/wp/v2',
     adminUsername: Bun.env.WP_ADMIN_USERNAME,
     adminPassword: Bun.env.WP_ADMIN_PASSWORD.replace(/\s/g, '')
+  },
+  jwt: {
+    secret: Bun.env.JWT_KEY
   }
 }
