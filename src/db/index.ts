@@ -64,7 +64,7 @@ interface UserRow extends RowDataPacket {
 };
 
 export const getUser = async (user: LoginType) => {
-  const sql: string = 'SELECT `id`, `password`, `wp_app_password` FROM `User` WHERE `email` = ?';
+  const sql: string = 'SELECT `id`, `password`, `wp_app_password`, `email` FROM `User` WHERE `email` = ?';
   const values: string[] = [user.email]
 
   const [result] = await pool.execute<UserRow[]>(sql ,values);
