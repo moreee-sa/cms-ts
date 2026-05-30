@@ -107,10 +107,16 @@ export const loginUser = async (req: Request, res: Response) => {
       password: userData.password
     });
 
-    await getUser(parseLoginUserData);
+    const token = await getUser(parseLoginUserData);
+
+    res.status(200).cookie('token', token, { httpOnly: true }).json({ success: true });
   } catch (error) {
     if (error instanceof Error && error.message === 'USER_DOES_NOT_EXIST') {
       return res.status(404).json({ success: false, message: "Utente non trovato" });
+    }
+
+    if (error instanceof Error && error.message === 'INVALID_PASSWORD') {
+      return res.status(404).json({ success: false, message: "Credenziali non valide" });
     }
 
     return handleError(error, res);
