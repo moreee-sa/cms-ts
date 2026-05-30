@@ -5,6 +5,7 @@ import { config } from '@/lib';
 import { type ApplicationPassword } from '@/types';
 import { insertUser } from '@/db';
 
+// Questa funzione consiste nel creare l'utente in WordPress, prendere il suo ID e creare la password dell'applicazione e viene salvato in un database SQL a parte
 export const createUser = async (req: Request, res: Response) => {
   const userData: UserType = req.body;
 
