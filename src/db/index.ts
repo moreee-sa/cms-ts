@@ -1,5 +1,5 @@
-import type { ApplicationPassword, UserType } from '@/types';
-import mysql from 'mysql2/promise';
+import type { ApplicationPassword, LoginType, UserType } from '@/types';
+import mysql, { type RowDataPacket } from 'mysql2/promise';
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = Bun.env;
 
@@ -62,4 +62,32 @@ export const insertUser = async (user: UserType, appPassword: ApplicationPasswor
 
   const [result, fields] = await pool.execute(sql, valus);
   return result
+}
+
+interface UserRow extends RowDataPacket {
+  id: number;
+  // name: string;
+  // email: string;
+  password: string;
+  wp_app_password: string;
+};
+
+export const getUser = async (user: LoginType) => {
+  const sql: string = 'SELECT `id`, `password`, `wp_app_password` FROM `User` WHERE `email` = ?';
+  const values: string[] = [user.email]
+
+  const [result] = await pool.execute<UserRow[]>(sql ,values);
+
+  // Se non esiste neanche un risultato l'utente non esiste
+  if (result.length === 0) {
+    throw new Error('USER_DOES_NOT_EXIST');
+  }
+
+  const userData = result[0]!;
+
+  // E' necessario argon2 per verificare la password
+  if (user.password == userData.password) {
+    // Se l'utente e' effettivamente lui, genera un token
+    const sql: string = ''
+  }
 }
