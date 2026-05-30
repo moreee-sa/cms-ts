@@ -12,7 +12,6 @@ export const UserSchema = z.object({
   name: z.string("Il nome e' obbligatorio").min(5, "Il nome utente e' di minimo 5 caratteri"),
   email: z.email("L'email e' obbligatoria").toLowerCase(),
   password: z.string("La password e' obbglitatoria").min(8, "La password deve essere di minimo 8 caratteri")
-  // wp_app_password: z.string("API Password necessaria").min(24)
 });
 
 export type UserType = z.infer<typeof UserSchema>;
@@ -23,3 +22,10 @@ export type ApplicationPassword = {
   created: string;
   password: string;
 }
+
+export const LoginSchema = z.object({
+  email: z.email("L'email non e' valida").toLowerCase(),
+  password: z.string("La password e' obbligatoria").min(8, "La password deve essere di minimo 8 caratteri")
+});
+
+export type LoginType = z.infer<typeof LoginSchema>;
