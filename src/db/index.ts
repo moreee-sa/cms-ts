@@ -1,4 +1,4 @@
-import type { UserType } from '@/types';
+import type { ApplicationPassword, UserType } from '@/types';
 import mysql from 'mysql2/promise';
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = Bun.env;
@@ -51,12 +51,15 @@ const initDb = async () => {
     console.error(err);
   } finally {
     conn.release();
-    await pool.end();
   }
 }
 
 await initDb();
 
-export const insertUser = (user: UserType) => {
-  
+export const insertUser = async (user: UserType, appPassword: ApplicationPassword) => {
+  const sql: string = 'INSERT INTO `User`(`name`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?);';
+  const valus: string[] = [user.name, user.email, user.password, appPassword.password, appPassword.created]
+
+  const [result, fields] = await pool.execute(sql, valus);
+  return result
 }
