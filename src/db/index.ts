@@ -57,6 +57,6 @@ const initDb = async () => {
 
 await initDb();
 
-export const createUser = (user: UserType) => {
+export const insertUser = (user: UserType) => {
   
 }
