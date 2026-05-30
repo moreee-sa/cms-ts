@@ -3,6 +3,8 @@ import type { Request, Response } from 'express';
 import { PostSchema, type PostType } from '@/types';
 import z from 'zod';
 
+// Questo file si occupa di gestire il fetch dei dati su WordPress
+
 export const getPosts = async (req: Request, res: Response) => {
   try {
     // Effettua un fetch verso WordPress per recuperare tutti i post
