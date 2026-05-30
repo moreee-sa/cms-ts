@@ -1,7 +1,7 @@
 import { config } from "@/lib";
 import type { Request, Response } from 'express';
 import { PostSchema, type PostType } from '@/types';
-import z from 'zod';
+import { handleError } from "@/routes/errors";
 
 // Questo file si occupa di gestire il fetch dei dati su WordPress
 
@@ -29,20 +29,20 @@ export const insertPost = async (req: Request, res: Response) => {
   
   // Verifica se l'autenticazione esiste o meno
   if (!authHeader) {
-    return res.json({
+    return res.status(401).json({
       success: false,
       error: "Autenticazione mancante"
-    }).sendStatus(401);
+    })
   };
 
   // Verifica se il contenuto dell'articolo e' stato ricevuto
   const postData: PostType = req.body;
   if (!postData) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error: "La richiesta non e' stata effettuata correttamente"
-    }).sendStatus(400);
-  }
+    })
+  };
 
   try {
     // Validazione dei dati
@@ -67,16 +67,6 @@ export const insertPost = async (req: Request, res: Response) => {
 
     return res.sendStatus(200);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      // Issues essendo un array, si puo' iterare per vedere il messaggio
-      for (const issue of error.issues) {
-        console.error(issue.message);
-      }
-    }
-
-    return res.json({
-      success: false,
-      error: "La richiesta non e' stata effettuata correttamente"
-    }).sendStatus(400);
+    handleError(error, res);
   }
 }
