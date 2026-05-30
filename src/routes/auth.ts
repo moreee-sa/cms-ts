@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { handleError } from '@/routes/errors';
 import { config } from '@/lib';
 import { type ApplicationPassword } from '@/types';
+import { insertUser } from '@/db';
 
 export const createUser = async (req: Request, res: Response) => {
   const userData: UserType = req.body;
@@ -33,7 +34,8 @@ export const createUser = async (req: Request, res: Response) => {
         'Authorization': `Basic ${auth64}`
       },
       body: JSON.stringify({
-        username: userData.name,
+        username: crypto.randomUUID(), // L'username e' univoco, mentre il nome puo' essere cambiato
+        name: userData.name,
         email: userData.email,
         password: userData.password,
         roles: ['author']
@@ -64,7 +66,7 @@ export const createUser = async (req: Request, res: Response) => {
           'Authorization': `Basic ${auth64}`
         },
         body: JSON.stringify({
-          name: 'cms-backend'
+          name: 'user-api-cms'
         }),
         tls: {
           rejectUnauthorized: false
@@ -73,13 +75,19 @@ export const createUser = async (req: Request, res: Response) => {
 
       // Se la "password dell'applicazione" viene creata correttamente, crea l'utente e inserisci la password dell'applicazione nel database
       if (applicationPassResponse.status == 201) {
-        const dataApplication = await applicationPassResponse.json() as ApplicationPassword;
+        const dataApplicationPassword = await applicationPassResponse.json() as ApplicationPassword;
 
-        // insertUser(...)
+        // Inserisci l'utente nel database
+        await insertUser(parseUserData, dataApplicationPassword);
+
+        return res.status(201).json({
+          success: true
+        });
       }
     }
 
   } catch (error) {
+    console.log(error);
     return handleError(error, res);
   }
 
