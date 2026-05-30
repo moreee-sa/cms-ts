@@ -46,7 +46,7 @@ export const createUser = async (req: Request, res: Response) => {
     })
 
     // Se l'utente esiste gia', invia un codice di stato 409
-    if (response.status == 500) {
+    if (response.status !== 500) {
       const data = await response.json() as { code: string, message: string };
       
       return res.status(409).json({
@@ -56,40 +56,35 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     // Se l'utente non esiste viene creato e poi prendi il suo ID
-    if (response.status == 201) {
-      const wpUser = await response.json() as { id: number };
+    const wpUser = await response.json() as { id: number };
 
-      const applicationPassResponse = await fetch(`${config.wp.baseUrl}/users/${wpUser.id}/application-passwords`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${auth64}`
-        },
-        body: JSON.stringify({
-          name: 'user-api-cms'
-        }),
-        tls: {
-          rejectUnauthorized: false
-        }
-      });
-
-      // Se la "password dell'applicazione" viene creata correttamente, crea l'utente e inserisci la password dell'applicazione nel database
-      if (applicationPassResponse.status == 201) {
-        const dataApplicationPassword = await applicationPassResponse.json() as ApplicationPassword;
-
-        // Inserisci l'utente nel database
-        await insertUser(parseUserData, dataApplicationPassword);
-
-        return res.status(201).json({
-          success: true
-        });
+    const applicationPassResponse = await fetch(`${config.wp.baseUrl}/users/${wpUser.id}/application-passwords`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${auth64}`
+      },
+      body: JSON.stringify({
+        name: 'user-api-cms'
+      }),
+      tls: {
+        rejectUnauthorized: false
       }
+    });
+
+    // Se la "password dell'applicazione" viene creata correttamente, crea l'utente e inserisci la password dell'applicazione nel database
+    if (applicationPassResponse.status !== 201) {
+      const data = await applicationPassResponse.json() as { code: string, message: string };
+      return res.status(applicationPassResponse.status).json({ success: false, message: data.message });
     }
 
+    const dataApplicationPassword = await applicationPassResponse.json() as ApplicationPassword;
+
+    await insertUser(parseUserData, dataApplicationPassword);
+
+    return res.status(201).json({ success: true });
   } catch (error) {
     console.log(error);
     return handleError(error, res);
   }
-
-  return res.sendStatus(200);
 }
