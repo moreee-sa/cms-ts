@@ -2,7 +2,7 @@ import express, { Router, type Request, type Response } from 'express'
 import { getPosts, insertPost } from '@/routes/wordpress';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
-import { createUser } from '@/routes/auth';
+import { createUser, loginUser } from '@/routes/auth';
 
 const app = express();
 
@@ -18,7 +18,8 @@ cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
 cmsRouter.post('/posts', insertPost); // Route per inserire in wordpress l'articolo
 
 // Endpoint per la gestione degli utenti
-cmsRouter.post('/auth/register', createUser);
+cmsRouter.post('/auth/register', createUser); // Per creare l'utente su WordPress, creare la password applicazione e salvarli sul database
+cmsRouter.post('/auth/login', loginUser) // Per effettuare il login, restituisce un cookie per l'accesso
 // TODO: /cms/v1/auth/login
 
 app.use(config.server.prefix, cmsRouter);
