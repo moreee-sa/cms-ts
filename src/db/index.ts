@@ -1,11 +1,10 @@
 import { generateToken, hashPass, verifyHash } from '@/crypto';
 import type { ApplicationPassword, LoginType, UserType } from '@/types';
 import mysql, { type RowDataPacket } from 'mysql2/promise';
-import { jwt } from 'zod';
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = Bun.env;
 
-const pool = mysql.createPool({
+export const pool = mysql.createPool({
   host: DB_HOST,
   port: Number(DB_PORT),
   user: DB_USER,
@@ -19,32 +18,6 @@ const pool = mysql.createPool({
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
 });
-
-const initDb = async () => {
-  const conn = await pool.getConnection();
-
-  const createUser = `
-    CREATE TABLE IF NOT EXISTS User (
-      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL,
-      wp_app_password VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    )
-  `;
-
-  try {
-    await conn.query(createUser);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    conn.release();
-  }
-}
-
-await initDb();
 
 export const insertUser = async (user: UserType, appPassword: ApplicationPassword) => {
   const sql: string = 'INSERT INTO `User`(`name`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?);';
