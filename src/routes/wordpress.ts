@@ -8,7 +8,11 @@ import { handleError } from "@/routes/errors";
 export const getPosts = async (req: Request, res: Response) => {
   try {
     // Effettua un fetch verso WordPress per recuperare tutti i post
-    const response = await fetch(`${config.wp.baseUrl}/posts`);
+    const response = await fetch(`${config.wp.baseUrl}/posts`, {
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
   
     // Se il server risponde, prendi il suo contenuto
     if (response.status == 200) {
