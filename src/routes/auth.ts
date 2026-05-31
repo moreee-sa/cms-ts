@@ -26,14 +26,15 @@ export const createUser = async (req: Request, res: Response) => {
 
     // Effettua il fetch verso wordpress per creare l'utente utilizzando le credenziali admin
     // Per effettuare questo fetch e' necessario utilizzare HTTPS e non HTTP
-    const wpUser = await createWPUser(parseUserData);
+    const wp_username: string = crypto.randomUUID();
+    const wpUser = await createWPUser(parseUserData, wp_username);
 
     // Se l'utente non esiste viene creato e poi prendi il suo ID
     const appPassword = await createWPApplicationPassword(wpUser.id);
 
     // Prova ad inserirlo nel database, se fallisce allora elimina l'utente su wordpress
     try {
-      await insertUser(parseUserData, appPassword);
+      await insertUser(parseUserData, appPassword, wp_username);
     } catch (error) {
       // Per transazioni di tipo ACID
       await deleteWPUser(wpUser.id);
