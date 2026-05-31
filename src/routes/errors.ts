@@ -29,3 +29,12 @@ export const handleError = (error: unknown, res: Response) => {
     error: "Errore interno del server"
   });
 }
+
+export const handleMissingAuthentication = (authHeader: string | undefined, res: Response) => {
+  if (!authHeader) {
+    return res.status(401).json({
+      success: false,
+      error: "Autenticazione mancante"
+    })
+  };
+}

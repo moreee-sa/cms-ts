@@ -1,7 +1,7 @@
 import { config } from "@/lib";
 import type { Request, Response } from 'express';
 import { PostSchema, type ApplicationPassword, type PostType, type UserType } from '@/types';
-import { handleError } from "@/routes/errors";
+import { handleError, handleMissingAuthentication } from "@/routes/errors";
 
 // Autenticazione <nome-utente>:<API password> in base64
 const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
@@ -35,12 +35,7 @@ export const insertPost = async (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   
   // Verifica se l'autenticazione esiste o meno
-  if (!authHeader) {
-    return res.status(401).json({
-      success: false,
-      error: "Autenticazione mancante"
-    })
-  };
+  handleMissingAuthentication(authHeader, res);
 
   // Verifica se il contenuto dell'articolo e' stato ricevuto
   const postData: PostType = req.body;
