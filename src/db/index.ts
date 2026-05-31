@@ -19,10 +19,10 @@ export const pool = mysql.createPool({
   keepAliveInitialDelay: 0,
 });
 
-export const insertUser = async (user: UserType, appPassword: ApplicationPassword) => {
-  const sql: string = 'INSERT INTO `User`(`name`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?);';
+export const insertUser = async (user: UserType, appPassword: ApplicationPassword, wp_username: string) => {
+  const sql: string = 'INSERT INTO `User`(`name`, `wp_username`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?, ?);';
   const hash: string = await hashPass(user.password);
-  const valus: string[] = [user.name, user.email, hash, appPassword.password, appPassword.created]
+  const valus: string[] = [user.name, wp_username ,user.email, hash, appPassword.password, appPassword.created]
 
   const [result, fields] = await pool.execute(sql, valus);
   return result
@@ -56,4 +56,19 @@ export const getUser = async (user: LoginType) => {
 
   // Genera un token
   return await generateToken({ id: userData.id, email: userData.email });
+}
+
+export const getWPPasswordByUserId = async (id: number) => {
+  const sql: string = 'SELECT `wp_app_password` FROM `User` WHERE `id` = ?';
+  const values: number[] = [id];
+
+  const [result] = await pool.execute<UserRow[]>(sql ,values);
+
+  if (result.length === 0) {
+    throw new Error('WP_APP_PASSWORD_DOES_NOT_EXIST');
+  }
+
+  const userData = result[0]!;
+
+  return userData;
 }
