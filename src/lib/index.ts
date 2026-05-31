@@ -8,7 +8,7 @@ export const config = {
     prefix: '/cms/v1'
   },
   wp: {
-    baseUrl: 'https://cms.test/wp-json/wp/v2',
+    baseUrl: Bun.env.WP_BASE_URL,
     adminUsername: Bun.env.WP_ADMIN_USERNAME,
     adminPassword: Bun.env.WP_ADMIN_PASSWORD.replace(/\s/g, '')
   },
