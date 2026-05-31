@@ -17,7 +17,6 @@ export const UserSchema = z.object({
 export type UserType = z.infer<typeof UserSchema>;
 
 export type ApplicationPassword = {
-  uuid: string;
   name: string;
   created: string;
   password: string;
