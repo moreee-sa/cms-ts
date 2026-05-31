@@ -6,10 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "bun --watch ./src/index.ts",
-    "build": "bun run typecheck && bun build ./src/index.ts --minify --target bun --outdir ./dist",
-    "start": "bun ./dist/index.js",
-    "clean": "rm -rf dist && echo 'Cartella dist eliminata.'",
-    "compile": "bun build --compile --minify --target=bun-windows-x64 ./src/index.ts --outfile ./dist/cms-app",
+    "start": "bun src/index.ts",
     "initdb": "bun ./src/db/init.ts"
   },
   "devDependencies": {
