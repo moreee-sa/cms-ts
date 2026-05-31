@@ -31,6 +31,7 @@ export const insertUser = async (user: UserType, appPassword: ApplicationPasswor
 interface UserRow extends RowDataPacket {
   id: number;
   // name: string;
+  wp_username: string;
   // email: string;
   password: string;
   wp_app_password: string;
@@ -59,7 +60,7 @@ export const getUser = async (user: LoginType) => {
 }
 
 export const getWPPasswordByUserId = async (id: number) => {
-  const sql: string = 'SELECT `wp_app_password` FROM `User` WHERE `id` = ?';
+  const sql: string = 'SELECT `wp_app_password`, `wp_username` FROM `User` WHERE `id` = ?';
   const values: number[] = [id];
 
   const [result] = await pool.execute<UserRow[]>(sql ,values);

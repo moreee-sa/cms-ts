@@ -1,7 +1,7 @@
 import { config } from "@/lib";
 import type { Request, Response } from 'express';
 import { PostSchema, type ApplicationPassword, type PostType, type UserType } from '@/types';
-import { handleError, handleMissingAuthentication } from "@/routes/errors";
+import { handleError } from "@/routes/errors";
 import { getWPPasswordByUserId } from "@/db";
 
 // Autenticazione <nome-utente>:<API password> in base64
@@ -32,7 +32,7 @@ export const getPosts = async (req: Request, res: Response) => {
   }
 }
 
-export const insertPost = async (req: Request, res: Response) => {
+export const createPost = async (req: Request, res: Response) => {
   // Verifica se il contenuto dell'articolo e' stato ricevuto
   const postData: PostType = req.body;
   if (!postData) {
@@ -56,16 +56,35 @@ export const insertPost = async (req: Request, res: Response) => {
 
     // Recupera la password dell'applicazione dal database
     const userData = await getWPPasswordByUserId(userAuth.id);
+    const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
 
-    // TODO: Elaborazione dati con AI
-    // ? Fetch WordPress
-    
-    // * Quando si effettua una richiesta API all'AI il testo principalmente sara' di tipo Markdown
-    // * Esiste una libreria chiamata marked.js
-    // ! Marked non sanifica l'output HTML, quindi attacchi XSS sono possibili
-    // ! E' consigliabile utilizzare DOMPurify come opzione di filtraggio
+    // Esegui il fetch dei dati
+    const response = await fetch(`${config.wp.baseUrl}/posts`, {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${authUser}`
+      },
+      body: JSON.stringify({
+        title: parsePostData.title,
+        content: parsePostData.content,
+        status: parsePostData.status
+      }),
+      tls: { rejectUnauthorized: false }
+    });
 
-    return res.sendStatus(200);
+    if (response.status != 201) {
+      const data = await response.json() as { code: string, message: string };
+      throw new Error(data.message);
+    }
+
+    console.log(response.status)
+    console.log(response.body)
+
+    return res.status(200).json({
+      success: true,
+      message: "Post creato correttamente"
+    });
   } catch (error) {
     handleError(error, res);
   }
