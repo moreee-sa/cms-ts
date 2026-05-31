@@ -1,5 +1,7 @@
 import { config } from '@/lib';
 import { GoogleGenAI } from '@google/genai'; // Docs https://github.com/googleapis/js-genai
+import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 
 export const getAISuggestion  = async (title: string, content: string) => {
   // * Quando si effettua una richiesta API all'AI il testo principalmente sara' di tipo Markdown
@@ -25,5 +27,11 @@ export const getAISuggestion  = async (title: string, content: string) => {
     contents: `Titolo: ${title}\n\nContenuto: ${content}`,
   });
 
-  return response.text;
+  if (response.text) {
+    const html = marked.parse(response.text);
+    const clean = DOMPurify.sanitize(html);
+    return clean;
+  }
+
+  throw new Error('Nessuna risposta dal modello AI');
 }
