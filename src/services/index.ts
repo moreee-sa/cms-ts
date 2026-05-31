@@ -17,6 +17,7 @@ export const getAISuggestion  = async (title: string, content: string) => {
     model: 'gemini-2.5-flash',
     // Questa configurazione si danno delle istruzioni precise a Gemini
       config: {
+        tools: [{ googleSearch: {} }],
         systemInstruction: `Sei un editor giornalistico italiano. 
           Migliora SOLO il contenuto del testo che ti viene fornito, senza modificare il titolo.
           Rispondi ESCLUSIVAMENTE con il contenuto migliorato, senza commenti, spiegazioni, introduzioni o note.
