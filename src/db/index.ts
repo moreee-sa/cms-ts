@@ -24,7 +24,7 @@ export const insertUser = async (user: UserType, appPassword: ApplicationPasswor
   const hash: string = await hashPass(user.password);
   const valus: string[] = [user.name, wp_username ,user.email, hash, appPassword.password, appPassword.created]
 
-  const [result, fields] = await pool.execute(sql, valus);
+  const [result] = await pool.execute(sql, valus);
   return result
 }
 
