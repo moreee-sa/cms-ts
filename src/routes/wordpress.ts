@@ -2,6 +2,7 @@ import { config } from "@/lib";
 import type { Request, Response } from 'express';
 import { PostSchema, type ApplicationPassword, type PostType, type UserType } from '@/types';
 import { handleError, handleMissingAuthentication } from "@/routes/errors";
+import { getWPPasswordByUserId } from "@/db";
 
 // Autenticazione <nome-utente>:<API password> in base64
 const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
@@ -41,6 +42,11 @@ export const insertPost = async (req: Request, res: Response) => {
     })
   };
 
+  const userAuth = req.user as { id: number };
+  const userData = await getWPPasswordByUserId(userAuth.id);
+
+  console.log(userData.wp_app_password);
+
   try {
     // Validazione dei dati
     const parsePostData = PostSchema.parse({
@@ -68,7 +74,7 @@ export const insertPost = async (req: Request, res: Response) => {
   }
 }
 
-export const createWPUser = async (userData: UserType) => {
+export const createWPUser = async (userData: UserType, wp_username: string) => {
   const response = await fetch(`${config.wp.baseUrl}/users`, {
     method: 'POST',
     headers: {
@@ -76,7 +82,7 @@ export const createWPUser = async (userData: UserType) => {
       'Authorization': `Basic ${auth64}`
     },
     body: JSON.stringify({
-      username: crypto.randomUUID(),
+      username: wp_username,
       name: userData.name,
       email: userData.email,
       password: userData.password,
