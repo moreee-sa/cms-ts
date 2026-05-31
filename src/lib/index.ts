@@ -14,5 +14,8 @@ export const config = {
   },
   jwt: {
     secret: Bun.env.JWT_KEY
+  },
+  gemini: {
+    apiKey: Bun.env.GEMINI_API_KEY
   }
 }
