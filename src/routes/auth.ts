@@ -37,10 +37,16 @@ export const createUser = async (req: Request, res: Response) => {
     } catch (error) {
       // Per transazioni di tipo ACID
       await deleteWPUser(wpUser.id);
-      return res.status(500).json({ success: false, message: "Errore durante la registrazione sul database" });
+      return res.status(500).json({
+        success: false,
+        message: "Errore durante la registrazione sul database"
+      });
     }
 
-    return res.status(201).json({ success: true });
+    return res.status(201).json({
+      success: true,
+      message: "L'account e' stato creato correttamente"
+    });
   } catch (error) {
     return handleError(error, res);
   }
