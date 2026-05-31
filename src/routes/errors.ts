@@ -17,6 +17,13 @@ export const handleError = (error: unknown, res: Response) => {
     })
   }
 
+  if (error instanceof Error) {
+    return res.status(409).json({
+      success: false,
+      message: error.message
+    });
+  }
+
   return res.status(500).json({
     success: false,
     error: "Errore interno del server"
