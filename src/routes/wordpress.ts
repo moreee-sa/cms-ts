@@ -42,12 +42,11 @@ export const insertPost = async (req: Request, res: Response) => {
     })
   };
 
-  const userAuth = req.user as { id: number };
-  const userData = await getWPPasswordByUserId(userAuth.id);
-
-  console.log(userData.wp_app_password);
-
+  
   try {
+    // Prendi l'id dal token
+    const userAuth = req.user as { id: number };
+
     // Validazione dei dati
     const parsePostData = PostSchema.parse({
       title: postData.title,
@@ -55,10 +54,8 @@ export const insertPost = async (req: Request, res: Response) => {
       status: postData.status,
     });
 
-    // Clone fortemente tipizzato dei dati
-    console.log(parsePostData.title)
-    console.log(parsePostData.content)
-    console.log(parsePostData.status)
+    // Recupera la password dell'applicazione dal database
+    const userData = await getWPPasswordByUserId(userAuth.id);
 
     // TODO: Elaborazione dati con AI
     // ? Fetch WordPress

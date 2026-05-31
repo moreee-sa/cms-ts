@@ -17,6 +17,13 @@ export const handleError = (error: unknown, res: Response) => {
     })
   }
 
+  if (error instanceof Error && error.message === 'WP_APP_PASSWORD_DOES_NOT_EXIST') {
+    return res.status(404).json({
+      success: false,
+      message: "La password dell'applicazione non e' stata trovata"
+    })
+  }
+
   if (error instanceof Error) {
     return res.status(409).json({
       success: false,
