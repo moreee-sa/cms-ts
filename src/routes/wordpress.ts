@@ -1,7 +1,10 @@
 import { config } from "@/lib";
 import type { Request, Response } from 'express';
-import { PostSchema, type PostType } from '@/types';
+import { PostSchema, type ApplicationPassword, type PostType, type UserType } from '@/types';
 import { handleError } from "@/routes/errors";
+
+// Autenticazione <nome-utente>:<API password> in base64
+const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
 
 // Questo file si occupa di gestire il fetch dei dati su WordPress
 
@@ -72,5 +75,62 @@ export const insertPost = async (req: Request, res: Response) => {
     return res.sendStatus(200);
   } catch (error) {
     handleError(error, res);
+  }
+}
+
+export const createWPUser = async (userData: UserType) => {
+  const response = await fetch(`${config.wp.baseUrl}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${auth64}`
+    },
+    body: JSON.stringify({
+      username: crypto.randomUUID(),
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      roles: ['author']
+    }),
+    tls: { rejectUnauthorized: false }
+  });
+
+  if (response.status !== 201) {
+    const data = await response.json() as { code: string, message: string };
+    throw new Error(data.message);
+  }
+
+  return await response.json() as { id: number };
+}
+
+export const createWPApplicationPassword = async (userId: number) => {
+  const response = await fetch(`${config.wp.baseUrl}/users/${userId}/application-passwords`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${auth64}`
+    },
+    body: JSON.stringify({ name: 'user-api-cms' }),
+    tls: { rejectUnauthorized: false }
+  });
+
+  if (response.status !== 201) {
+    const data = await response.json() as { code: string, message: string };
+    throw new Error(data.message);
+  }
+
+  return await response.json() as ApplicationPassword;
+}
+
+export const deleteWPUser = async (userId: number) => {
+  const response = await fetch(`${config.wp.baseUrl}/users/${userId}?force=true&reassign=1`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Basic ${auth64}` },
+    tls: { rejectUnauthorized: false }
+  });
+
+  if (!response.ok) {
+    const data = await response.json() as { code: string, message: string };
+    throw new Error(data.message);
   }
 }
