@@ -41,7 +41,6 @@ export const createPost = async (req: Request, res: Response) => {
       error: "La richiesta non e' stata effettuata correttamente"
     })
   };
-
   
   try {
     // Prendi l'id dal token
