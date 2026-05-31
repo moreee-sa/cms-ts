@@ -32,11 +32,6 @@ export const getPosts = async (req: Request, res: Response) => {
 }
 
 export const insertPost = async (req: Request, res: Response) => {
-  const authHeader = req.headers.authorization;
-  
-  // Verifica se l'autenticazione esiste o meno
-  handleMissingAuthentication(authHeader, res);
-
   // Verifica se il contenuto dell'articolo e' stato ricevuto
   const postData: PostType = req.body;
   if (!postData) {
