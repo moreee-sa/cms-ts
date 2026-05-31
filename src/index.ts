@@ -17,7 +17,7 @@ app.use(cookieParser());
 const cmsRouter = Router();
 
 // Questi endpoint si occupano di gestire il fetch dei dati su wordpress
-cmsRouter.get('/', authMiddleware, getAPIHealth); // Route per verificare la salute dell'API
+cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
 cmsRouter.post('/posts', authMiddleware, createPost); // Route per inserire in wordpress l'articolo
 cmsRouter.post('/posts/preview', authMiddleware, generatePreview)
