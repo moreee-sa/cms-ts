@@ -19,13 +19,13 @@ export const pool = mysql.createPool({
   keepAliveInitialDelay: 0,
 });
 
-export const insertUser = async (user: UserType, appPassword: ApplicationPassword, wp_username: string) => {
-  const sql: string = 'INSERT INTO `User`(`name`, `wp_username`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?, ?);';
+export const insertUser = async (user: UserType, appPassword: ApplicationPassword, wp_username: string, wp_user_id: number) => {
+  const sql: string = 'INSERT INTO `User`(`name`, `wp_username`, `wp_user_id`, `email`, `password`, `wp_app_password`, `created_at`) VALUES (?, ?, ?, ?, ?, ?, ?);';
   const hash: string = await hashPass(user.password);
-  const valus: string[] = [user.name, wp_username ,user.email, hash, appPassword.password, appPassword.created]
+  const values = [user.name, wp_username, wp_user_id, user.email, hash, appPassword.password, appPassword.created];
 
-  const [result] = await pool.execute(sql, valus);
-  return result
+  const [result] = await pool.execute(sql, values);
+  return result;
 }
 
 interface UserRow extends RowDataPacket {
@@ -38,7 +38,7 @@ interface UserRow extends RowDataPacket {
 };
 
 export const getUser = async (user: LoginType) => {
-  const sql: string = 'SELECT `id`, `password`, `wp_app_password`, `email` FROM `User` WHERE `email` = ?';
+  const sql: string = 'SELECT `wp_user_id`, `password`, `wp_app_password`, `email` FROM `User` WHERE `email` = ?';
   const values: string[] = [user.email]
 
   const [result] = await pool.execute<UserRow[]>(sql ,values);
@@ -56,7 +56,7 @@ export const getUser = async (user: LoginType) => {
   }
 
   // Genera un token
-  return await generateToken({ id: userData.id, email: userData.email });
+  return await generateToken({ id: userData.wp_user_id, email: userData.email });
 }
 
 export const getWPPasswordByUserId = async (id: number) => {

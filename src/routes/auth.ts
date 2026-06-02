@@ -34,7 +34,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     // Prova ad inserirlo nel database, se fallisce allora elimina l'utente su wordpress
     try {
-      await insertUser(parseUserData, appPassword, wp_username);
+      await insertUser(parseUserData, appPassword, wp_username, wpUser.id);
     } catch (error) {
       // Per transazioni di tipo ACID
       await deleteWPUser(wpUser.id);
