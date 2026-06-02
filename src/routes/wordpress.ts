@@ -9,6 +9,7 @@ const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
 
 // Questo file si occupa di gestire il fetch dei dati su WordPress
 
+// Recupera tutti i post pubblici in wordpress
 export const getPosts = async (req: Request, res: Response) => {
   try {
     // Effettua un fetch verso WordPress per recuperare tutti i post
@@ -32,6 +33,39 @@ export const getPosts = async (req: Request, res: Response) => {
   }
 }
 
+// Recupera tutti i post dell'autore tramite il suo ID
+export const getPostsById = async (req: Request, res: Response) => {
+  // const status = req.query.status;
+  const userAuth = req.user as { id: number };
+
+  try {
+    const userData = await getWPPasswordByUserId(userAuth.id);
+    const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
+
+    const response = await fetch(`${config.wp.baseUrl}/posts?author=${userAuth.id}&status=publish,draft,private`, {
+      method: 'GET',
+      headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${authUser}`
+      },
+      tls: { rejectUnauthorized: false }
+    });
+
+    if (response.status != 200) {
+      const data = await response.json() as { code: string, message: string };
+      throw new Error(data.message);
+    }
+
+    const data = await response.json();
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error("Errore di connessione a Wordpress");
+    return res.sendStatus(500);
+  }
+}
+
+// Per creare un post
 export const createPost = async (req: Request, res: Response) => {
   // Verifica se il contenuto dell'articolo e' stato ricevuto
   const postData: PostType = req.body;
