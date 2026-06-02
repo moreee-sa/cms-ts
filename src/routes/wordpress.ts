@@ -8,6 +8,12 @@ import z from "zod";
 // Autenticazione <nome-utente>:<API password> in base64
 const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
 
+const getAuthUser = async (id: number) => {
+  const userData = await getWPPasswordByUserId(id);
+  const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
+  return authUser;
+}
+
 // Questo file si occupa di gestire il fetch dei dati su WordPress
 
 // Recupera tutti i post pubblici in wordpress
@@ -40,8 +46,7 @@ export const getPostsById = async (req: Request, res: Response) => {
   const userAuth = req.user as { id: number };
 
   try {
-    const userData = await getWPPasswordByUserId(userAuth.id);
-    const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
+    const authUser = await getAuthUser(userAuth.id);
 
     const response = await fetch(`${config.wp.baseUrl}/posts?author=${userAuth.id}&status=publish,draft,private`, {
       method: 'GET',
@@ -77,10 +82,10 @@ export const createPost = async (req: Request, res: Response) => {
     })
   };
   
+  // Prendi l'id dal token
+  const userAuth = req.user as { id: number };
+  
   try {
-    // Prendi l'id dal token
-    const userAuth = req.user as { id: number };
-
     // Validazione dei dati
     const parsePostData = PostSchema.parse({
       title: postData.title,
@@ -89,8 +94,7 @@ export const createPost = async (req: Request, res: Response) => {
     });
 
     // Recupera la password dell'applicazione dal database
-    const userData = await getWPPasswordByUserId(userAuth.id);
-    const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
+    const authUser = await getAuthUser(userAuth.id);
 
     // Esegui il fetch dei dati
     const response = await fetch(`${config.wp.baseUrl}/posts`, {
@@ -136,8 +140,7 @@ export const deletePost = async (req: Request, res: Response) => {
     const postId = z.coerce.number().int().positive().parse(req.params.id);
 
     // Recupera la password dell'applicazione dal database
-    const userData = await getWPPasswordByUserId(userAuth.id);
-    const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
+    const authUser = await getAuthUser(userAuth.id);
 
     const response = await fetch(`${config.wp.baseUrl}/posts/${postId}`, {
       method: 'DELETE',
