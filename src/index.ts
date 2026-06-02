@@ -19,13 +19,15 @@ const cmsRouter = Router();
 // Questi endpoint si occupano di gestire il fetch dei dati su wordpress
 cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
-cmsRouter.get('/dashboard/posts', authMiddleware, getPostsById); // Route per ottenere i post tramite l'id dell'autore
 cmsRouter.post('/posts', authMiddleware, createPost); // Route per inserire in wordpress l'articolo
 cmsRouter.post('/posts/preview', authMiddleware, generatePreview)
 
 // Endpoint per la gestione degli utenti
 cmsRouter.post('/auth/register', createUser); // Per creare l'utente su WordPress, creare la password applicazione e salvarli sul database
 cmsRouter.post('/auth/login', loginUser) // Per effettuare il login, restituisce un cookie per l'accesso
+
+// Dashboard
+cmsRouter.get('/dashboard/posts', authMiddleware, getPostsById); // Route per ottenere tutti i post dell'autore tramite il suo ID (Dentro JWT)
 
 app.use(config.server.prefix, cmsRouter);
 
