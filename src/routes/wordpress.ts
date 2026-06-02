@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { PostSchema, type ApplicationPassword, type PostType, type UserType } from '@/types';
 import { handleError } from "@/routes/errors";
 import { getWPPasswordByUserId } from "@/db";
+import z from "zod";
 
 // Autenticazione <nome-utente>:<API password> in base64
 const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
@@ -120,6 +121,69 @@ export const createPost = async (req: Request, res: Response) => {
   }
 }
 
+export const deletePost = async (req: Request, res: Response) => {
+  const params = req.params;
+  const userAuth = req.user as { id: number };
+
+  if (!params) {
+    return res.status(400).json({
+      success: false,
+      error: "La richiesta non e' stata effettuata correttamente"
+    })
+  }
+
+  try {
+    const postId = z.coerce.number().int().positive().parse(req.params.id);
+
+    // Recupera la password dell'applicazione dal database
+    const userData = await getWPPasswordByUserId(userAuth.id);
+    const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
+
+    const response = await fetch(`${config.wp.baseUrl}/posts/${postId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Basic ${authUser}` },
+      tls: { rejectUnauthorized: false }
+    })
+
+    switch (response.status) {
+      case 200:
+        return res.status(200).json({
+          success: true,
+          message: "L'articolo e' stato rimosso correttamente"
+        });
+
+      case 403:
+        return res.status(403).json({
+          success: false,
+          error: "Non hai i permessi necessari per eliminare questo articolo"
+        });
+
+      case 404:
+        return res.status(404).json({
+          success: false,
+          error: "L'articolo non e' stato trovato"
+        });
+
+      case 410:
+        return res.status(410).json({
+          success: false,
+          error: "L'articolo e' stato rimosso in modo permanente"
+        });
+
+      default:
+        return res.status(response.status).json({
+          success: false,
+          error: "Impossibile completare l'operazione su WordPress"
+        });
+    }
+  } catch (error) {
+    handleError(error, res);
+  }
+
+  return res.sendStatus(500);
+}
+
+// Funzione per creare un utente con ruolo autore su wordpress
 export const createWPUser = async (userData: UserType, wp_username: string) => {
   const response = await fetch(`${config.wp.baseUrl}/users`, {
     method: 'POST',

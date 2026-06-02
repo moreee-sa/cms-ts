@@ -1,5 +1,5 @@
 import express, { Router, type Request, type Response } from 'express'
-import { getPosts, createPost, getPostsById } from '@/routes/wordpress';
+import { getPosts, createPost, getPostsById, deletePost } from '@/routes/wordpress';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
 import { createUser, loginUser } from '@/routes/auth';
@@ -16,10 +16,14 @@ app.use(cookieParser());
 
 const cmsRouter = Router();
 
-// Questi endpoint si occupano di gestire il fetch dei dati su wordpress
 cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
+
+// Questi endpoint si occupano di gestire il fetch dei dati su wordpress
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
 cmsRouter.post('/posts', authMiddleware, createPost); // Route per creare l'articolo in wordpress
+cmsRouter.delete('/posts/:id', authMiddleware, deletePost); // Per cancellare un post
+
+// Integrazione con Gemini
 cmsRouter.post('/posts/preview', authMiddleware, generatePreview) // Partendo da un contenuto, utilizza Gemini con Google Search per migliorare il contenuto
 
 // Endpoint per la gestione degli utenti
