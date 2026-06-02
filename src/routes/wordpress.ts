@@ -77,9 +77,6 @@ export const createPost = async (req: Request, res: Response) => {
       throw new Error(data.message);
     }
 
-    console.log(response.status)
-    console.log(response.body)
-
     return res.status(201).json({
       success: true,
       message: "Post creato correttamente"
