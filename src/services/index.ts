@@ -1,5 +1,5 @@
 import { config } from '@/lib';
-import { GoogleGenAI } from '@google/genai'; // Docs https://github.com/googleapis/js-genai
+import { ApiError, GoogleGenAI } from '@google/genai'; // Docs https://github.com/googleapis/js-genai
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 
@@ -26,6 +26,13 @@ export const getAISuggestion  = async (title: string, content: string) => {
           Solo il contenuto migliorato, nient'altro.`
       },
     contents: `Titolo: ${title}\n\nContenuto: ${content}`,
+  }).catch((e: ApiError) => {
+    console.error(e.status)
+    if (e.status === 503) {
+      throw new Error('AI_OVERLOADED');
+    }
+
+    throw e;
   });
 
   // TODO: Fix per errore 503 quando il server non e' in grado di gestire la richiesta
