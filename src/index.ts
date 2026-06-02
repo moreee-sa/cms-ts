@@ -38,7 +38,7 @@ cmsRouter.post('/auth/register', createUser); // Per creare l'utente su WordPres
 cmsRouter.post('/auth/login', loginUser) // Per effettuare il login, restituisce un cookie per l'accesso
 
 // Dashboard
-cmsRouter.get('/dashboard/posts', authMiddleware, getPostsById); // Route per ottenere tutti i post dell'autore tramite il suo ID (Dentro JWT)
+cmsRouter.get('/dashboard/posts', authMiddleware, getPostsById); // Route per ottenere tutti i post dell'autore, anche quelli privati, tramite il suo ID (Dentro JWT)
 
 app.use(config.server.prefix, cmsRouter);
 
