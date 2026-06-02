@@ -19,7 +19,7 @@ const cmsRouter = Router();
 cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
 
 // Questi endpoint si occupano di gestire il fetch dei dati su wordpress
-cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
+cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress (solo quelli public)
 cmsRouter.post('/posts', authMiddleware, createPost); // Route per creare l'articolo in wordpress
 cmsRouter.delete('/posts/:id', authMiddleware, deletePost); // Per cancellare un post
 
