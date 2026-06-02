@@ -1,5 +1,5 @@
 import express, { Router, type Request, type Response } from 'express'
-import { getPosts, createPost } from '@/routes/wordpress';
+import { getPosts, createPost, getPostsById } from '@/routes/wordpress';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
 import { createUser, loginUser } from '@/routes/auth';
@@ -19,6 +19,7 @@ const cmsRouter = Router();
 // Questi endpoint si occupano di gestire il fetch dei dati su wordpress
 cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
+cmsRouter.get('/dashboard/posts', authMiddleware, getPostsById); // Route per ottenere i post tramite l'id dell'autore
 cmsRouter.post('/posts', authMiddleware, createPost); // Route per inserire in wordpress l'articolo
 cmsRouter.post('/posts/preview', authMiddleware, generatePreview)
 
