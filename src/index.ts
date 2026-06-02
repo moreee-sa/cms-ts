@@ -19,8 +19,8 @@ const cmsRouter = Router();
 // Questi endpoint si occupano di gestire il fetch dei dati su wordpress
 cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress
-cmsRouter.post('/posts', authMiddleware, createPost); // Route per inserire in wordpress l'articolo
-cmsRouter.post('/posts/preview', authMiddleware, generatePreview)
+cmsRouter.post('/posts', authMiddleware, createPost); // Route per creare l'articolo in wordpress
+cmsRouter.post('/posts/preview', authMiddleware, generatePreview) // Partendo da un contenuto, utilizza Gemini con Google Search per migliorare il contenuto
 
 // Endpoint per la gestione degli utenti
 cmsRouter.post('/auth/register', createUser); // Per creare l'utente su WordPress, creare la password applicazione e salvarli sul database
