@@ -56,9 +56,9 @@ export const getPostsById = async (req: Request, res: Response) => {
       throw new Error(data.message);
     }
 
-    const data = await response.json();
+    const posts = await response.json();
 
-    return res.status(200).json(data);
+    return res.status(200).json(posts);
   } catch (error) {
     console.error("Errore di connessione a Wordpress");
     return res.sendStatus(500);
