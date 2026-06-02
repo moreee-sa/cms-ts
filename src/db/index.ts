@@ -60,7 +60,7 @@ export const getUser = async (user: LoginType) => {
 }
 
 export const getWPPasswordByUserId = async (id: number) => {
-  const sql: string = 'SELECT `wp_app_password`, `wp_username` FROM `User` WHERE `id` = ?';
+  const sql: string = 'SELECT `wp_app_password`, `wp_username` FROM `User` WHERE `wp_user_id` = ?';
   const values: number[] = [id];
 
   const [result] = await pool.execute<UserRow[]>(sql ,values);
