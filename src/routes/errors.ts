@@ -23,6 +23,7 @@ export const handleError = (error: unknown, res: Response) => {
       message: "La password dell'applicazione non e' stata trovata"
     })
   }
+  
   if (error instanceof Error && error.message === 'AI_OVERLOADED') {
     return res.status(503).json({
       success: false,

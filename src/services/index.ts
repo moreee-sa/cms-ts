@@ -35,9 +35,6 @@ export const getAISuggestion  = async (title: string, content: string) => {
     throw e;
   });
 
-  // TODO: Fix per errore 503 quando il server non e' in grado di gestire la richiesta
-  // This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-
   if (response.text) {
     const html = marked.parse(response.text);
     const clean = DOMPurify.sanitize(html);
