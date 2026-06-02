@@ -1,4 +1,5 @@
-import express, { Router, type Request, type Response } from 'express'
+import express, { Router} from 'express'
+import cors, { type CorsOptions } from 'cors';
 import { getPosts, createPost, getPostsById, deletePost } from '@/routes/wordpress';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
@@ -9,6 +10,12 @@ import { generatePreview } from '@/routes/ai';
 
 const app = express();
 
+const corsOptions: CorsOptions = {
+  // origin: [''],
+  methods: ['GET', 'POST', 'DELETE']
+}
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
