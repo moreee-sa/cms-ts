@@ -1,20 +1,18 @@
 import { LoginSchema, UserSchema, type LoginType, type UserType } from '@/types';
 import type { Request, Response } from 'express';
 import { handleError } from '@/routes/errors';
-import { config } from '@/lib';
-import { type ApplicationPassword } from '@/types';
 import { getUser, insertUser } from '@/db';
-import { createWPApplicationPassword, createWPUser, deleteWPUser } from '@/routes/wordpress';
+import { createWPApplicationPassword, createWPUser, deleteWPUser } from '@/routes/auth/user';
 
 // Questa funzione consiste nel creare l'utente in WordPress, prendere il suo ID e creare la password dell'applicazione e viene salvato in un database SQL a parte
 export const createUser = async (req: Request, res: Response) => {
   const userData: UserType = req.body;
 
   if (!userData) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error: "La richiesta non e' stata effettuata correttamente"
-    }).sendStatus(400);
+    });
   };
 
   try {
@@ -38,6 +36,7 @@ export const createUser = async (req: Request, res: Response) => {
     } catch (error) {
       // Per transazioni di tipo ACID
       await deleteWPUser(wpUser.id);
+      
       return res.status(500).json({
         success: false,
         message: "Errore durante la registrazione sul database"
@@ -58,10 +57,10 @@ export const loginUser = async (req: Request, res: Response) => {
   const userData: LoginType = req.body;
 
   if (!userData) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error: "La richiesta non e' stata effettuata correttamente"
-    }).sendStatus(400);
+    });
   };
 
   try {

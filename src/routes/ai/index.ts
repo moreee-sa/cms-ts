@@ -9,7 +9,7 @@ export const generatePreview = async (req: Request, res: Response) => {
     return res.status(400).json({
       success: false,
       error: "La richiesta non e' stata effettuata correttamente"
-    })
+    });
   };
 
   try {
@@ -24,7 +24,7 @@ export const generatePreview = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       content: generatedText
-    })
+    });
   } catch (error) {
     handleError(error, res);
   }

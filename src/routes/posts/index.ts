@@ -1,29 +1,16 @@
-import { config } from "@/lib";
 import type { Request, Response } from 'express';
-import { PostSchema, type ApplicationPassword, type PostType, type UserType } from '@/types';
-import { handleError } from "@/routes/errors";
-import { getWPPasswordByUserId } from "@/db";
-import z from "zod";
-
-// Autenticazione <nome-utente>:<API password> in base64
-const auth64 = btoa(`${config.wp.adminUsername}:${config.wp.adminPassword}`);
-
-const getAuthUser = async (id: number) => {
-  const userData = await getWPPasswordByUserId(id);
-  const authUser = btoa(`${userData.wp_username}:${userData.wp_app_password}`);
-  return authUser;
-}
-
-// Questo file si occupa di gestire il fetch dei dati su WordPress
+import { config } from "@/lib";
+import { getAuthUser } from '@/routes/auth/user';
+import { handleError } from '@/routes/errors';
+import { PostSchema, type PostType } from '@/types';
+import z from 'zod';
 
 // Recupera tutti i post pubblici in wordpress
 export const getPosts = async (req: Request, res: Response) => {
   try {
     // Effettua un fetch verso WordPress per recuperare tutti i post
     const response = await fetch(`${config.wp.baseUrl}/posts`, {
-      tls: {
-        rejectUnauthorized: false
-      }
+      tls: { rejectUnauthorized: false }
     });
   
     // Se il server risponde, prendi il suo contenuto
@@ -71,7 +58,7 @@ export const getPostsById = async (req: Request, res: Response) => {
   }
 }
 
-// Per creare un post
+// Crea un articolo
 export const createPost = async (req: Request, res: Response) => {
   // Verifica se il contenuto dell'articolo e' stato ricevuto
   const postData: PostType = req.body;
@@ -125,6 +112,7 @@ export const createPost = async (req: Request, res: Response) => {
   }
 }
 
+// Elimina un articolo tramite l'ID articolo
 export const deletePost = async (req: Request, res: Response) => {
   const params = req.params;
   const userAuth = req.user as { id: number };
@@ -184,62 +172,4 @@ export const deletePost = async (req: Request, res: Response) => {
   }
 
   return res.sendStatus(500);
-}
-
-// Funzione per creare un utente con ruolo autore su wordpress
-export const createWPUser = async (userData: UserType, wp_username: string) => {
-  const response = await fetch(`${config.wp.baseUrl}/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${auth64}`
-    },
-    body: JSON.stringify({
-      username: wp_username,
-      name: userData.name,
-      email: userData.email,
-      password: userData.password,
-      roles: ['author']
-    }),
-    tls: { rejectUnauthorized: false }
-  });
-
-  if (response.status !== 201) {
-    const data = await response.json() as { code: string, message: string };
-    throw new Error(data.message);
-  }
-
-  return await response.json() as { id: number };
-}
-
-export const createWPApplicationPassword = async (userId: number) => {
-  const response = await fetch(`${config.wp.baseUrl}/users/${userId}/application-passwords`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${auth64}`
-    },
-    body: JSON.stringify({ name: 'user-api-cms' }),
-    tls: { rejectUnauthorized: false }
-  });
-
-  if (response.status !== 201) {
-    const data = await response.json() as { code: string, message: string };
-    throw new Error(data.message);
-  }
-
-  return await response.json() as ApplicationPassword;
-}
-
-export const deleteWPUser = async (userId: number) => {
-  const response = await fetch(`${config.wp.baseUrl}/users/${userId}?force=true&reassign=1`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Basic ${auth64}` },
-    tls: { rejectUnauthorized: false }
-  });
-
-  if (!response.ok) {
-    const data = await response.json() as { code: string, message: string };
-    throw new Error(data.message);
-  }
 }

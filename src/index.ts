@@ -1,6 +1,6 @@
 import express, { Router} from 'express'
 import cors, { type CorsOptions } from 'cors';
-import { getPosts, createPost, getPostsById, deletePost } from '@/routes/wordpress';
+import { getPosts, createPost, getPostsById, deletePost } from '@/routes/posts';
 import { getAPIHealth } from '@/routes/';
 import { config } from '@/lib'
 import { createUser, loginUser } from '@/routes/auth';
@@ -29,6 +29,7 @@ cmsRouter.get('/', getAPIHealth); // Route per verificare la salute dell'API
 cmsRouter.get('/posts', getPosts); // Route per ottenere i post dentro wordpress (solo quelli public)
 cmsRouter.post('/posts', authMiddleware, createPost); // Route per creare l'articolo in wordpress
 cmsRouter.delete('/posts/:id', authMiddleware, deletePost); // Per cancellare un post
+// cmsRouter.put('/posts/:id', updatePost);
 
 // Integrazione con Gemini
 cmsRouter.post('/posts/preview', authMiddleware, generatePreview) // Partendo da un contenuto, utilizza Gemini con Google Search per migliorare il contenuto
