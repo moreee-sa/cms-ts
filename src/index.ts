@@ -1,4 +1,4 @@
-import express, { Router} from 'express'
+import express, { Router } from 'express'
 import cors, { type CorsOptions } from 'cors';
 import { getPosts, createPost, getPostsById, deletePost } from '@/routes/posts';
 import { getAPIHealth } from '@/routes/';
